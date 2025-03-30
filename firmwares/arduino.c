@@ -16,7 +16,7 @@ void setup() {
     pinMode(BUZZER, OUTPUT);
     pinMode(LDR, INPUT);
     pinMode(ESP_TX, OUTPUT);
-    digitalWrite(ESP_TX, LOW); // Começa desativado
+    digitalWrite(ESP_TX, HIGH); // Mudar para high para ajuste 
 
     Serial.begin(9600);
     Serial.println("Iniciar projeto? (s/n)");
@@ -24,8 +24,8 @@ void setup() {
 
 void loop() {
     int leituraLDR = analogRead(LDR);
-    Serial.print("Luminosidade: ");
-    Serial.println(leituraLDR);
+    // Serial.print("Luminosidade: ");
+    // Serial.println(leituraLDR);
 
     if (!sistemaArmado) {
         if (Serial.available()) {
@@ -45,14 +45,12 @@ void loop() {
 }
 
 void iniciarSistema() {
-    sistemaArmado = true;
+    sistemaArmado = true; 
     alertaAtivo = false;  
     digitalWrite(LED_R, HIGH);
     digitalWrite(LED_G, LOW); 
     digitalWrite(LASER, HIGH);
     digitalWrite(ESP_TX, HIGH); // Envia 1 para ESP transmissora
-    Serial.println("Sistema armado. Insira a senha:");
-
     if (tempoInicio == 0) {
         tempoInicio = millis();
     }
@@ -60,7 +58,6 @@ void iniciarSistema() {
 
 void verificarLDR(int leituraLDR) {
     if (leituraLDR < 800) {
-        Serial.println("Alerta! Intrusao detectada!");
         alertaAtivo = true;
     } 
 
@@ -81,11 +78,6 @@ void verificarSenha() {
 
         if (senhaRecebida == senhaCorreta) {
             unsigned long tempoAtual = millis() - tempoInicio;
-            Serial.print("Acesso permitido! Tempo decorrido: ");
-            Serial.print(tempoAtual / 1000);
-            Serial.print("s ");
-            Serial.print(tempoAtual % 1000);
-            Serial.println("ms");
 
             digitalWrite(LED_R, LOW);
             digitalWrite(LED_G, HIGH);
@@ -94,6 +86,11 @@ void verificarSenha() {
             noTone(BUZZER);
 
             delay(2000);
+            Serial.println("Sistema desbloqueado");
+            Serial.print(tempoAtual / 1000);
+            Serial.print("s ");
+            Serial.print(tempoAtual % 1000);
+            Serial.println("ms");
             Serial.println("Rearmar sistema? (s/n)");
 
             while (true) {
@@ -108,13 +105,13 @@ void verificarSenha() {
                         digitalWrite(LED_G, HIGH);
                         digitalWrite(LASER, LOW);
                         digitalWrite(ESP_TX, LOW);
+                        Serial.println("Sistema bloqueado");
                         break;
                     }
                 }
             }
         } else {
-            Serial.println("Acesso negado!");
-            Serial.println("Sistema armado. Insira a senha:");
+            Serial.println("Sistema bloqueado");
             alertaErro();
         }
     }
